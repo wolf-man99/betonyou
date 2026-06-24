@@ -69,13 +69,14 @@ export default function Auth() {
       setError(err.message)
       return
     }
-    // New user with no profile → ask for name.
+    // If the user has already set their name they're a returning user → Home.
+    // Otherwise (row just created by DB trigger but name is null) → ask for name.
     const { data: existing } = await supabase
       .from('users')
-      .select('id')
+      .select('id, name')
       .eq('id', data.user.id)
       .maybeSingle()
-    if (existing) {
+    if (existing?.name) {
       navigate('/', { replace: true })
     } else {
       setStep(STEPS.NAME)
