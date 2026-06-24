@@ -5,11 +5,15 @@ import App from './App.jsx'
 import { AuthProvider } from './hooks/useAuth'
 import './index.css'
 
-// Register the service worker for "add to home screen" / offline shell.
+// NOTE: We intentionally do NOT register a service worker right now.
+// A previous service worker cached index.html and trapped users on stale
+// builds. /sw.js is now a kill-switch that unregisters any existing worker
+// and clears its caches. Once an existing worker self-destructs and no new
+// one is registered here, every visit loads fresh content from the network.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
-  })
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.update())
+  }).catch(() => {})
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

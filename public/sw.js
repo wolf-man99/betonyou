@@ -1,59 +1,37 @@
-// Minimal service worker for "add to home screen" + offline shell.
-// Bump CACHE_VERSION on every production deploy so stale index.html is never served.
-const CACHE_VERSION = 'v2'
-const CACHE = `boy-cache-${CACHE_VERSION}`
+// KILL-SWITCH service worker.
+//
+// An earlier service worker (boy-cache-v1) cached index.html and the JS bundle,
+// which trapped users on stale builds — new Vercel deployments never reached
+// them. This version neutralizes any previously-installed service worker:
+// it deletes every cache, unregisters itself, and reloads open tabs so they
+// load fresh content directly from the network.
+//
+// Offline/PWA support can be reintroduced later once the deploy pipeline is
+// stable; for now reliable updates matter more than an offline shell.
 
-// Only cache static assets — NOT index.html (it's fetched network-first so
-// new Vercel deployments reach users immediately).
-const PRECACHE = ['/manifest.json', '/icons/icon.svg']
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
-  )
+self.addEventListener('install', () => {
+  self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    (async () => {
+      // 1. Nuke all caches left by previous service worker versions.
+      const keys = await caches.keys()
+      await Promise.all(keys.map((key) => caches.delete(key)))
+
+      // 2. Take control of any open clients.
+      await self.clients.claim()
+
+      // 3. Unregister this service worker entirely.
+      await self.registration.unregister()
+
+      // 4. Reload every open tab so it re-fetches fresh assets from the network.
+      const clients = await self.clients.matchAll({ type: 'window' })
+      clients.forEach((client) => client.navigate(client.url))
+    })()
   )
 })
 
-self.addEventListener('fetch', (event) => {
-  const { request } = event
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return
-
-  const url = new URL(request.url)
-  const isHtml = url.pathname === '/' || url.pathname.endsWith('.html')
-
-  if (isHtml) {
-    // Network-first for HTML so new deployments are picked up immediately.
-    // Falls back to cache only when offline.
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone()
-          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {})
-          return response
-        })
-        .catch(() => caches.match(request))
-    )
-    return
-  }
-
-  // Cache-first for all other same-origin assets (JS/CSS have content hashes).
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const networkFetch = fetch(request)
-        .then((response) => {
-          const copy = response.clone()
-          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {})
-          return response
-        })
-        .catch(() => cached)
-      return cached || networkFetch
-    })
-  )
-})
+// Pass-through: never serve anything from cache.
+self.addEventListener('fetch', () => {})
