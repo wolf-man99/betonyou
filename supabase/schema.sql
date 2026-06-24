@@ -8,12 +8,30 @@
 -- Users profile (extends Supabase auth.users)
 create table if not exists public.users (
   id uuid references auth.users(id) primary key,
-  name text not null,
+  name text,        -- nullable: set by the user in the NAME step after OTP
   phone text,
   avatar_url text,
   boy_points_balance integer default 0,
   created_at timestamptz default now()
 );
+
+-- Auto-create the public.users row the moment a new auth user is created.
+-- This prevents FK failures on bets/checkins/transactions when client-side
+-- profile creation races against the session being ready.
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.users (id, phone, name)
+  values (new.id, new.phone, null)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
 
 -- Bets
 create table if not exists public.bets (
