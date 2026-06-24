@@ -17,7 +17,7 @@ function FullScreenLoader() {
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center">
       <div className="text-center">
-        <p className="font-display text-white text-[40px] tracking-tight">BOY</p>
+        <p className="font-display text-white text-[40px] tracking-tight">Bet On You</p>
         <span className="mt-4 inline-block w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
       </div>
     </div>
