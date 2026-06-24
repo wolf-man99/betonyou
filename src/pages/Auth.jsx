@@ -69,6 +69,7 @@ export default function Auth() {
       setError(err.message)
       return
     }
+    // New user with no profile → ask for name.
     const { data: existing } = await supabase
       .from('users')
       .select('id')
@@ -99,6 +100,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
+      {/* Gradient header with wordmark */}
       <header className="gradient-hero text-white pt-safe">
         <div className="px-6 pt-10 pb-12">
           <p className="font-display text-[40px] tracking-tight">BOY</p>

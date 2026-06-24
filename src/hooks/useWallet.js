@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
+// Wallet = BOY points balance (from the profile) + the transaction ledger.
 export function useWallet() {
   const { user, profile, refreshProfile } = useAuth()
   const [transactions, setTransactions] = useState([])

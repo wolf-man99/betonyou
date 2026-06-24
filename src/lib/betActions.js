@@ -2,6 +2,8 @@ import { supabase } from './supabase'
 import { creditOnWin, platformCut, PLATFORM_FEE } from './revenue'
 import { addDays, todayISO, isPast } from './dates'
 
+// ---- Create bet ------------------------------------------------------------
+
 const FREQ_DIVISOR = { daily: 1, every2: 2, weekly: 7 }
 
 export function computeCheckinsRequired(durationDays, frequency) {
@@ -9,7 +11,18 @@ export function computeCheckinsRequired(durationDays, frequency) {
   return Math.max(1, Math.floor(durationDays / divisor))
 }
 
-export async function createBet({userId,goalType,description,amount,durationDays,frequency,platformFeePaid,razorpayOrderId,razorpayPaymentId,}) {
+// Creates a bet row after a successful payment. Returns { data, error }.
+export async function createBet({
+  userId,
+  goalType,
+  description,
+  amount, // paise
+  durationDays,
+  frequency, // 'daily' | 'every2' | 'weekly'
+  platformFeePaid,
+  razorpayOrderId,
+  razorpayPaymentId,
+}) {
   const start = todayISO()
   const end = addDays(start, durationDays)
   const checkinsRequired = computeCheckinsRequired(durationDays, frequency)
@@ -37,6 +50,7 @@ export async function createBet({userId,goalType,description,amount,durationDays
     .single()
 
   if (!error && data) {
+    // Ledger: the stake leaving the user's pocket (debit) + optional platform fee.
     const ledger = [
       {
         user_id: userId,
@@ -61,6 +75,10 @@ export async function createBet({userId,goalType,description,amount,durationDays
   return { data, error }
 }
 
+// ---- Check-in --------------------------------------------------------------
+
+// Uploads photo, inserts a checkin row, bumps the count, and auto-resolves on
+// completion. Returns { checkin, bet, resolution }.
 export async function submitCheckin({ bet, userId, file, gps }) {
   const timestamp = Date.now()
   const ext = (file.name?.split('.').pop() || 'jpg').toLowerCase()
@@ -103,6 +121,9 @@ export async function submitCheckin({ bet, userId, file, gps }) {
   return { checkin, bet: updatedBet, resolution }
 }
 
+// ---- Resolution ------------------------------------------------------------
+
+// Decides win / forfeit / still-active and applies wallet effects exactly once.
 export async function resolveBet(bet) {
   if (!bet || bet.status !== 'active') return null
 
@@ -123,11 +144,11 @@ async function finalizeBet(bet, outcome) {
     .from('bets')
     .update({ status: outcome })
     .eq('id', bet.id)
-    .eq('status', 'active')
+    .eq('status', 'active') // guard against double-resolve
     .select()
     .single()
 
-  if (!updated) return null
+  if (!updated) return null // someone else already resolved it
 
   if (outcome === 'won') {
     const credit = creditOnWin(bet.amount)
@@ -148,11 +169,13 @@ async function finalizeBet(bet, outcome) {
       description: `Forfeited: ${bet.description}`,
       bet_id: bet.id,
     })
+    // No balance credit on forfeit — the stake was already debited at placement.
   }
 
   return { outcome, bet: updated }
 }
 
+// Atomically nudge the BOY points balance by `delta` paise.
 async function adjustBalance(userId, delta) {
   const { data: profile } = await supabase
     .from('users')
@@ -163,6 +186,8 @@ async function adjustBalance(userId, delta) {
   await supabase.from('users').update({ boy_points_balance: next }).eq('id', userId)
 }
 
+// ---- Tips ------------------------------------------------------------------
+
 export async function sendTip({ userId, amount, betId }) {
   return supabase.from('transactions').insert({
     user_id: userId,
@@ -172,6 +197,8 @@ export async function sendTip({ userId, amount, betId }) {
     bet_id: betId || null,
   })
 }
+
+// ---- Withdrawals -----------------------------------------------------------
 
 export async function requestWithdrawal({ userId, amount, upiId }) {
   const { data, error } = await supabase

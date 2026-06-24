@@ -11,6 +11,7 @@ const STATUS_TONE = {
   pending_payment: { tone: 'amber', label: 'Pending' },
 }
 
+// Is a check-in still possible today? (active + not all check-ins done)
 function checkinDue(bet) {
   return bet.status === 'active' && (bet.checkins_completed || 0) < (bet.checkins_required || 0)
 }

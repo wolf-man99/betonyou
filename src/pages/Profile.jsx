@@ -99,12 +99,14 @@ export default function Profile() {
       </GradientHeader>
 
       <div className="px-4 py-5 space-y-6">
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           <Stat label="Total bets" value={total} />
           <Stat label="Bets won" value={won} />
           <Stat label="Win rate" value={`${winRate}%`} />
         </div>
 
+        {/* Settings list */}
         <div className="bg-white rounded-card shadow-card divide-y divide-black/[0.05]">
           {settings.map((s) => (
             <button

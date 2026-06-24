@@ -6,7 +6,7 @@ import { toRupees, platformCut, toPaise } from '../lib/revenue'
 import { sendTip } from '../lib/betActions'
 import { useAuth } from '../hooks/useAuth'
 
-const TIP_PRESETS = [1000, 2000, 5000]
+const TIP_PRESETS = [1000, 2000, 5000] // ₹10 / ₹20 / ₹50 in paise
 
 function Confetti() {
   const pieces = useMemo(
@@ -38,6 +38,7 @@ function Confetti() {
   )
 }
 
+// outcome: 'won' | 'forfeited'
 export default function ResolutionScreen({ bet, outcome, onClose, onViewWallet, onTryAgain }) {
   const { user } = useAuth()
   const won = outcome === 'won'
@@ -72,7 +73,9 @@ export default function ResolutionScreen({ bet, outcome, onClose, onViewWallet, 
         <div className="relative flex-1 overflow-y-auto no-scrollbar px-6 pt-safe">
           <div className="min-h-full flex flex-col items-center justify-center text-center py-12">
             <div
-              className={`w-24 h-24 rounded-full flex items-center justify-center ${won ? 'bg-lime' : 'bg-coral/15'}`}
+              className={`w-24 h-24 rounded-full flex items-center justify-center ${
+                won ? 'bg-lime' : 'bg-coral/15'
+              }`}
             >
               {won ? (
                 <Trophy size={44} className="text-indigo" />
@@ -82,7 +85,9 @@ export default function ResolutionScreen({ bet, outcome, onClose, onViewWallet, 
             </div>
 
             <h1
-              className={`mt-6 font-display text-[26px] leading-tight ${won ? 'text-white' : 'text-indigo'}`}
+              className={`mt-6 font-display text-[26px] leading-tight ${
+                won ? 'text-white' : 'text-indigo'
+              }`}
             >
               {won ? copy.winHeadline : copy.lossHeadline}
             </h1>
@@ -100,6 +105,7 @@ export default function ResolutionScreen({ bet, outcome, onClose, onViewWallet, 
               </div>
             )}
 
+            {/* Tip prompt — shown on both win and loss */}
             <div className="mt-8 w-full max-w-[320px]">
               {tipped ? (
                 <p className={`text-[14px] ${won ? 'text-white/85' : 'text-muted'}`}>

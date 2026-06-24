@@ -1,3 +1,10 @@
+// Razorpay checkout helpers.
+//
+// In a production build the `order_id` should come from a server/Edge Function
+// that calls Razorpay's Orders API with your secret key. For the Phase 1 MVP we
+// support both: if `orderId` is provided we use it, otherwise Razorpay falls
+// back to a keyed test charge so the flow is demoable end-to-end.
+
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 export const isRazorpayConfigured = Boolean(RAZORPAY_KEY_ID)
@@ -15,7 +22,7 @@ export const openRazorpay = ({ amount, orderId, name, phone, email, onSuccess, o
 
   const options = {
     key: RAZORPAY_KEY_ID,
-    amount,
+    amount, // in paise
     currency: 'INR',
     name: 'Bet On You',
     description: 'Goal stake',

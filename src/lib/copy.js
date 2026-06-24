@@ -1,3 +1,4 @@
+// Brand copy — use exactly as written.
 export const copy = {
   appName: 'Bet On You',
   wordmark: 'BOY',

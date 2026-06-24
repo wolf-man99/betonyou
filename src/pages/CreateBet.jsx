@@ -26,7 +26,11 @@ function Chip({ active, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`min-h-[44px] px-4 rounded-btn text-[14px] font-700 border transition active:scale-[0.98] ${active ? 'bg-lime text-indigo border-lime' : 'bg-white text-indigo border-black/10'}`}
+      className={`min-h-[44px] px-4 rounded-btn text-[14px] font-700 border transition active:scale-[0.98] ${
+        active
+          ? 'bg-lime text-indigo border-lime'
+          : 'bg-white text-indigo border-black/10'
+      }`}
     >
       {children}
     </button>
@@ -104,6 +108,8 @@ export default function CreateBet() {
     if (stakePaise < MIN_BET) return setError('Minimum bet is ₹100.')
     setPaying(true)
 
+    // If Razorpay isn't configured (e.g. local preview without keys), still let
+    // the user create the bet so the flow is reviewable end-to-end.
     if (!isRazorpayConfigured) {
       persistBet(null)
       return
@@ -127,12 +133,16 @@ export default function CreateBet() {
       <GradientHeader title="New Bet" back={false}>
         <div className="mt-3 flex gap-1.5">
           {[1, 2, 3, 4].map((s) => (
-            <span key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? 'bg-lime' : 'bg-white/25'}`} />
+            <span
+              key={s}
+              className={`h-1.5 flex-1 rounded-full ${s <= step ? 'bg-lime' : 'bg-white/25'}`}
+            />
           ))}
         </div>
       </GradientHeader>
 
       <div className="flex-1 overflow-y-auto px-4 py-5 no-scrollbar">
+        {/* Step 1 — Goal */}
         {step === 1 && (
           <div>
             <h2 className="font-display text-[20px] text-indigo">What's your goal?</h2>
@@ -141,7 +151,11 @@ export default function CreateBet() {
                 <button
                   key={g.id}
                   onClick={() => setGoalType(g.id)}
-                  className={`min-h-[64px] rounded-card p-3 flex items-center gap-2 border transition active:scale-[0.98] ${goalType === g.id ? 'bg-lime text-indigo border-lime' : 'bg-white text-indigo border-black/10'}`}
+                  className={`min-h-[64px] rounded-card p-3 flex items-center gap-2 border transition active:scale-[0.98] ${
+                    goalType === g.id
+                      ? 'bg-lime text-indigo border-lime'
+                      : 'bg-white text-indigo border-black/10'
+                  }`}
                 >
                   <g.icon size={20} />
                   <span className="font-700 text-[14px]">{g.label}</span>
@@ -164,6 +178,7 @@ export default function CreateBet() {
           </div>
         )}
 
+        {/* Step 2 — Duration & Frequency */}
         {step === 2 && (
           <div>
             <h2 className="font-display text-[20px] text-indigo">How long?</h2>
@@ -204,6 +219,7 @@ export default function CreateBet() {
           </div>
         )}
 
+        {/* Step 3 — Stake */}
         {step === 3 && (
           <div>
             <h2 className="font-display text-[20px] text-indigo">How much are you betting?</h2>
@@ -238,6 +254,7 @@ export default function CreateBet() {
               <p className="mt-2 text-[13px] text-coral text-center">Minimum bet is ₹100.</p>
             )}
 
+            {/* Platform fee toggle */}
             <div className="mt-7 bg-white rounded-card shadow-card p-4 flex items-center justify-between gap-3">
               <div>
                 <p className="font-700 text-[14px] text-indigo">Support the platform</p>
@@ -245,15 +262,22 @@ export default function CreateBet() {
               </div>
               <button
                 onClick={() => setPlatformFee((v) => !v)}
-                className={`w-12 h-7 rounded-full p-0.5 transition shrink-0 ${platformFee ? 'bg-lime' : 'bg-black/15'}`}
+                className={`w-12 h-7 rounded-full p-0.5 transition shrink-0 ${
+                  platformFee ? 'bg-lime' : 'bg-black/15'
+                }`}
                 aria-pressed={platformFee}
               >
-                <span className={`block w-6 h-6 rounded-full bg-white shadow transition-transform ${platformFee ? 'translate-x-5' : ''}`} />
+                <span
+                  className={`block w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                    platformFee ? 'translate-x-5' : ''
+                  }`}
+                />
               </button>
             </div>
           </div>
         )}
 
+        {/* Step 4 — Review & Pay */}
         {step === 4 && (
           <div>
             <h2 className="font-display text-[20px] text-indigo">Review &amp; lock in</h2>
@@ -261,7 +285,12 @@ export default function CreateBet() {
               <Row label="Goal" value={description} />
               <Row label="Type" value={GOAL_TYPES.find((g) => g.id === goalType)?.label} />
               <Row label="Duration" value={`${durationDays} days`} />
-              <Row label="Check-ins" value={`${checkinsRequired} × ${FREQUENCIES.find((f) => f.id === frequency)?.label}`} />
+              <Row
+                label="Check-ins"
+                value={`${checkinsRequired} × ${
+                  FREQUENCIES.find((f) => f.id === frequency)?.label
+                }`}
+              />
               <div className="border-t border-black/[0.06] pt-3 space-y-2">
                 <Row label="Bet stake" value={toRupees(stakePaise)} mono />
                 {platformFee && <Row label="Platform fee" value={toRupees(PLATFORM_FEE)} mono />}
@@ -283,6 +312,7 @@ export default function CreateBet() {
         {error && <p className="mt-4 text-[13px] text-coral">{error}</p>}
       </div>
 
+      {/* Sticky footer */}
       <div className="sticky bottom-0 bg-surface/95 backdrop-blur border-t border-black/[0.06] px-4 py-3 pb-safe">
         <div className="flex gap-3">
           <Button variant="outline" className="flex-1" onClick={back}>

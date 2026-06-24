@@ -2,6 +2,7 @@ export default function Skeleton({ className = '' }) {
   return <div className={`skeleton rounded-card ${className}`} />
 }
 
+// A bet-card-shaped skeleton used on Home / Bets while loading.
 export function BetCardSkeleton() {
   return (
     <div className="bg-white rounded-card shadow-card p-4 space-y-3">

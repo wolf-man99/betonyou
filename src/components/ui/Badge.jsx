@@ -11,7 +11,9 @@ const TONES = {
 export default function Badge({ children, tone = 'muted', className = '' }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-700 leading-none ${TONES[tone] || TONES.muted} ${className}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-700 leading-none ${
+        TONES[tone] || TONES.muted
+      } ${className}`}
     >
       {children}
     </span>

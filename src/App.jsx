@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import BottomNav from './components/ui/BottomNav'
+
 import Onboarding from './pages/Onboarding'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
@@ -23,6 +24,7 @@ function FullScreenLoader() {
   )
 }
 
+// Routes that show the bottom nav and require auth.
 function AppShell() {
   return (
     <div className="min-h-screen bg-surface flex justify-center">
@@ -36,6 +38,7 @@ function AppShell() {
   )
 }
 
+// Full-bleed routes (auth, onboarding, create) — no bottom nav.
 function BareShell() {
   return (
     <div className="min-h-screen bg-surface flex justify-center">
@@ -57,23 +60,57 @@ function RequireAuth({ children }) {
 export default function App() {
   const { user, loading } = useAuth()
   const onboarded = typeof localStorage !== 'undefined' && localStorage.getItem(ONBOARDING_KEY)
+
   if (loading) return <FullScreenLoader />
 
   return (
     <Routes>
+      {/* Public / full-bleed */}
       <Route element={<BareShell />}>
-        <Route path="/onboarding" element={user ? <Navigate to="/" replace /> : <Onboarding />} />
+        <Route
+          path="/onboarding"
+          element={user ? <Navigate to="/" replace /> : <Onboarding />}
+        />
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
-        <Route path="/create" element={<RequireAuth><CreateBet /></RequireAuth>} />
-        <Route path="/bet/:id" element={<RequireAuth><BetDetail /></RequireAuth>} />
+        <Route
+          path="/create"
+          element={
+            <RequireAuth>
+              <CreateBet />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/bet/:id"
+          element={
+            <RequireAuth>
+              <BetDetail />
+            </RequireAuth>
+          }
+        />
       </Route>
-      <Route element={<RequireAuth><AppShell /></RequireAuth>}>
+
+      {/* Authed app with bottom nav */}
+      <Route
+        element={
+          <RequireAuth>
+            <AppShell />
+          </RequireAuth>
+        }
+      >
         <Route path="/" element={<Home />} />
         <Route path="/bets" element={<Bets />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
-      <Route path="*" element={<Navigate to={user ? '/' : onboarded ? '/auth' : '/onboarding'} replace />} />
+
+      {/* First-time visitors with no session → onboarding */}
+      <Route
+        path="*"
+        element={
+          <Navigate to={user ? '/' : onboarded ? '/auth' : '/onboarding'} replace />
+        }
+      />
     </Routes>
   )
 }

@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { AuthProvider } from './hooks/useAuth'
 import './index.css'
 
+// Register the service worker for "add to home screen" / offline shell.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {})

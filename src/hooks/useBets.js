@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
+// Fetches the current user's bets (most recent first) and exposes a refetch.
 export function useBets() {
   const { user } = useAuth()
   const [bets, setBets] = useState([])
@@ -32,6 +33,7 @@ export function useBets() {
   return { bets, loading, error, refetch: fetchBets }
 }
 
+// Fetch a single bet + its check-ins.
 export function useBet(betId) {
   const [bet, setBet] = useState(null)
   const [checkins, setCheckins] = useState([])

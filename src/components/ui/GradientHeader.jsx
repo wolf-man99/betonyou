@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 
+// Sticky violet gradient header used across primary screens.
 export default function GradientHeader({ title, subtitle, back = false, right, children }) {
   const navigate = useNavigate()
   return (

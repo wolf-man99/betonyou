@@ -1,3 +1,4 @@
+// Minimal service worker for "add to home screen" + offline shell.
 const CACHE = 'boy-cache-v1'
 const PRECACHE = ['/', '/index.html', '/manifest.json', '/icons/icon.svg']
 
@@ -17,6 +18,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event
+  // Only handle GET requests on the same origin; never cache Supabase/Razorpay calls.
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return
 
   event.respondWith(

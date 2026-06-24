@@ -1,6 +1,11 @@
+-- =============================================================================
 -- Bet On You (BOY) — Supabase schema
 -- Run this in the Supabase SQL editor for your project.
+-- =============================================================================
 
+-- ---- Tables ----------------------------------------------------------------
+
+-- Users profile (extends Supabase auth.users)
 create table if not exists public.users (
   id uuid references auth.users(id) primary key,
   name text not null,
@@ -10,17 +15,18 @@ create table if not exists public.users (
   created_at timestamptz default now()
 );
 
+-- Bets
 create table if not exists public.bets (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) not null,
-  goal_type text not null,
+  goal_type text not null,             -- 'fitness' | 'productivity' | 'learning' | 'custom'
   description text not null,
-  amount integer not null,
+  amount integer not null,             -- stored in paise (₹1 = 100 paise)
   duration_days integer not null,
-  checkin_frequency text not null,
+  checkin_frequency text not null,     -- 'daily' | 'weekly'
   start_date date not null,
   end_date date not null,
-  status text default 'active',
+  status text default 'active',        -- 'active' | 'won' | 'forfeited' | 'pending_payment'
   platform_fee_paid boolean default false,
   checkins_required integer not null,
   checkins_completed integer default 0,
@@ -29,6 +35,7 @@ create table if not exists public.bets (
   created_at timestamptz default now()
 );
 
+-- Check-ins
 create table if not exists public.checkins (
   id uuid default gen_random_uuid() primary key,
   bet_id uuid references public.bets(id) not null,
@@ -40,24 +47,28 @@ create table if not exists public.checkins (
   checked_at timestamptz default now()
 );
 
+-- Transactions (wallet ledger)
 create table if not exists public.transactions (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) not null,
-  type text not null,
-  amount integer not null,
+  type text not null,                  -- 'bet_placed' | 'bet_won' | 'bet_forfeited' | 'tip' | 'platform_fee' | 'withdrawal'
+  amount integer not null,             -- in paise, positive = credit, negative = debit
   description text,
   bet_id uuid references public.bets(id),
   created_at timestamptz default now()
 );
 
+-- Withdrawal requests
 create table if not exists public.withdrawals (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) not null,
-  amount integer not null,
+  amount integer not null,             -- in paise
   upi_id text not null,
-  status text default 'pending',
+  status text default 'pending',       -- 'pending' | 'approved' | 'rejected'
   requested_at timestamptz default now()
 );
+
+-- ---- Row Level Security ----------------------------------------------------
 
 alter table public.users enable row level security;
 alter table public.bets enable row level security;
@@ -77,11 +88,15 @@ create policy "Users own checkins" on public.checkins for all using (auth.uid() 
 create policy "Users own transactions" on public.transactions for all using (auth.uid() = user_id);
 create policy "Users own withdrawals" on public.withdrawals for all using (auth.uid() = user_id);
 
+-- ---- Storage ---------------------------------------------------------------
+
+-- Create the private check-in photos bucket.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('checkin-photos', 'checkin-photos', false, 5242880,
         array['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do nothing;
 
+-- Storage policies: users can only touch files under their own {user_id}/ prefix.
 drop policy if exists "Checkin photos read own" on storage.objects;
 drop policy if exists "Checkin photos write own" on storage.objects;
 

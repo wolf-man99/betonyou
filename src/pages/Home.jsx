@@ -50,10 +50,14 @@ export default function Home() {
 
   return (
     <div>
+      {/* Sticky gradient header */}
       <header className="sticky top-0 z-30 gradient-hero text-white pt-safe">
         <div className="px-4 pt-4 pb-5">
           <div className="flex items-center justify-between">
-            <button onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden"
+            >
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -62,16 +66,21 @@ export default function Home() {
                 </span>
               )}
             </button>
+
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1 bg-lime text-indigo font-mono text-[13px] px-3 py-1.5 rounded-full">
                 <Sparkles size={14} />
                 {toRupees(profile?.boy_points_balance || 0)}
               </span>
-              <button aria-label="Notifications" className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
+              <button
+                aria-label="Notifications"
+                className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"
+              >
                 <Bell size={18} />
               </button>
             </div>
           </div>
+
           <div className="mt-4">
             <p className="text-[14px] text-white/80">{greeting()}</p>
             <h1 className="font-display text-[24px] leading-tight">
@@ -82,6 +91,7 @@ export default function Home() {
       </header>
 
       <div className="px-4 py-5 space-y-6">
+        {/* Active bets */}
         <section>
           <h2 className="font-700 text-[16px] text-indigo mb-3">Active Bets</h2>
           {loading ? (
@@ -115,6 +125,7 @@ export default function Home() {
           )}
         </section>
 
+        {/* Quick actions */}
         <section>
           <h2 className="font-700 text-[16px] text-indigo mb-3">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -134,6 +145,7 @@ export default function Home() {
         </section>
       </div>
 
+      {/* Floating action button */}
       <button
         onClick={() => navigate('/create')}
         aria-label="New bet"

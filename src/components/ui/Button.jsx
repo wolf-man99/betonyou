@@ -1,3 +1,4 @@
+// Pill button. Variants: lime (primary), indigo, outline, ghost, white.
 const VARIANTS = {
   lime: 'bg-lime text-indigo active:bg-[#9bd92f]',
   indigo: 'bg-indigo text-white active:opacity-90',
@@ -8,7 +9,15 @@ const VARIANTS = {
   coral: 'bg-coral text-white active:opacity-90',
 }
 
-export default function Button({children,variant = 'lime',className = '',disabled = false,loading = false,type = 'button',...props}) {
+export default function Button({
+  children,
+  variant = 'lime',
+  className = '',
+  disabled = false,
+  loading = false,
+  type = 'button',
+  ...props
+}) {
   return (
     <button
       type={type}

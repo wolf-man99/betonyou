@@ -71,6 +71,7 @@ export default function BetDetail() {
       />
 
       <div className="flex-1 overflow-y-auto px-4 py-5 space-y-5 no-scrollbar">
+        {/* Stake + progress */}
         <div className="bg-white rounded-card shadow-card p-5">
           <p className="text-[12px] text-muted">Stake on the line</p>
           <p className="mt-1 font-mono text-[34px] text-violet leading-none">{toRupees(bet.amount)}</p>
@@ -91,6 +92,7 @@ export default function BetDetail() {
           </div>
         </div>
 
+        {/* Timeline */}
         <section>
           <h2 className="font-700 text-[16px] text-indigo mb-3">Check-in timeline</h2>
           {checkins.length === 0 ? (
@@ -129,6 +131,7 @@ export default function BetDetail() {
         </section>
       </div>
 
+      {/* Sticky check-in button */}
       {due && (
         <div className="sticky bottom-0 bg-surface/95 backdrop-blur border-t border-black/[0.06] px-4 py-3 pb-safe">
           <Button onClick={() => setCheckInOpen(true)}>{copy.checkinCta}</Button>

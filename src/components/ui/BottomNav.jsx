@@ -10,7 +10,9 @@ const navItems = [
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app bg-white border-t border-black/[0.06] z-40 pb-safe">
+    <nav
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app bg-white border-t border-black/[0.06] z-40 pb-safe"
+    >
       <div className="flex h-14">
         {navItems.map((item) => (
           <NavLink

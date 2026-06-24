@@ -3,9 +3,26 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 
 const SLIDES = [
-  {bg:'gradient-hero text-white',art:'🪙',title:'Your goals need skin in the game.',sub:'Set a goal. Bet money on it. Do it or pay up.'},
-  {bg:'bg-white text-indigo',steps:[{n:1,icon:'🎯',text:'Set your goal and rules'},{n:2,icon:'💰',text:'Lock in your stake (min ₹100)'},{n:3,icon:'📸',text:'Check in daily with a photo'}],title:'How it works'},
-  {bg:'bg-white text-indigo',title:'The stakes',lines:['Win: Get your money back.','Lose: The platform keeps it.','Either way, you showed up.']},
+  {
+    bg: 'gradient-hero text-white',
+    art: '🪙',
+    title: 'Your goals need skin in the game.',
+    sub: 'Set a goal. Bet money on it. Do it or pay up.',
+  },
+  {
+    bg: 'bg-white text-indigo',
+    steps: [
+      { n: 1, icon: '🎯', text: 'Set your goal and rules' },
+      { n: 2, icon: '💰', text: 'Lock in your stake (min ₹100)' },
+      { n: 3, icon: '📸', text: 'Check in daily with a photo' },
+    ],
+    title: 'How it works',
+  },
+  {
+    bg: 'bg-white text-indigo',
+    title: 'The stakes',
+    lines: ['Win: Get your money back.', 'Lose: The platform keeps it.', 'Either way, you showed up.'],
+  },
 ]
 
 export default function Onboarding() {
@@ -40,6 +57,7 @@ export default function Onboarding() {
       </div>
 
       <div className="flex-1 flex flex-col justify-center px-7">
+        {/* Slide 1 — Hook */}
         {i === 0 && (
           <div className="text-center">
             <div className="text-[72px] leading-none">{slide.art}💰</div>
@@ -48,6 +66,7 @@ export default function Onboarding() {
           </div>
         )}
 
+        {/* Slide 2 — How it works */}
         {i === 1 && (
           <div>
             <h1 className="font-display text-[24px] leading-tight mb-7">{slide.title}</h1>
@@ -67,6 +86,7 @@ export default function Onboarding() {
           </div>
         )}
 
+        {/* Slide 3 — Stakes */}
         {i === 2 && (
           <div>
             <h1 className="font-display text-[24px] leading-tight mb-7">{slide.title}</h1>
@@ -82,6 +102,7 @@ export default function Onboarding() {
       </div>
 
       <div className="px-7 pb-10 pb-safe">
+        {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-6">
           {SLIDES.map((_, idx) => (
             <span

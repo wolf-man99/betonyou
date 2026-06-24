@@ -16,7 +16,7 @@ const TABS = [
 const EMPTY_COPY = {
   active: { emoji: '😳', text: 'No active bets. Are you scared?' },
   won: { emoji: '🏆', text: "No wins yet. They're coming." },
-  forfeited: { emoji: '🤫', text: 'Nothing forfeited. Keep it that way.' },
+  forfeited: { emoji: '🫡', text: 'Nothing forfeited. Keep it that way.' },
 }
 
 export default function Bets() {
@@ -44,7 +44,9 @@ export default function Bets() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex-1 min-h-[40px] rounded-full text-[13px] font-700 transition ${tab === t.id ? 'bg-white text-indigo' : 'text-white/85'}`}
+              className={`flex-1 min-h-[40px] rounded-full text-[13px] font-700 transition ${
+                tab === t.id ? 'bg-white text-indigo' : 'text-white/85'
+              }`}
             >
               {t.label}
             </button>

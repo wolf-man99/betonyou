@@ -1,3 +1,5 @@
+// Small date helpers (no external dependency).
+
 export const todayISO = () => new Date().toISOString().slice(0, 10)
 
 export const addDays = (dateStr, days) => {
@@ -12,6 +14,7 @@ export const daysBetween = (a, b) => {
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24))
 }
 
+// Days remaining until end_date (>= 0). Past dates clamp to 0.
 export const daysRemaining = (endDate) => Math.max(0, daysBetween(todayISO(), endDate))
 
 export const isPast = (dateStr) => daysBetween(todayISO(), dateStr) < 0

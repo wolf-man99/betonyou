@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
+// Provider keeps the Supabase session + the user's profile row in sync.
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -19,6 +20,7 @@ export function AuthProvider({ children }) {
       .eq('id', userId)
       .maybeSingle()
     if (error) {
+      // eslint-disable-next-line no-console
       console.error('loadProfile error', error)
     }
     setProfile(data || null)
@@ -45,6 +47,7 @@ export function AuthProvider({ children }) {
     }
   }, [loadProfile])
 
+  // Create the profile row right after first OTP verification.
   const createProfile = useCallback(
     async (name) => {
       const user = session?.user
