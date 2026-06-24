@@ -53,7 +53,12 @@ function RequireAuth({ children }) {
   const { user, loading } = useAuth()
   const location = useLocation()
   if (loading) return <FullScreenLoader />
-  if (!user) return <Navigate to="/auth" replace state={{ from: location }} />
+  if (!user) {
+    // First-time visitors (no session, not yet onboarded) see onboarding;
+    // returning-but-logged-out users skip straight to login.
+    const onboarded = typeof localStorage !== 'undefined' && localStorage.getItem(ONBOARDING_KEY)
+    return <Navigate to={onboarded ? '/auth' : '/onboarding'} replace state={{ from: location }} />
+  }
   return children
 }
 
