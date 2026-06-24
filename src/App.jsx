@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import BottomNav from './components/ui/BottomNav'
 
@@ -24,7 +24,6 @@ function FullScreenLoader() {
   )
 }
 
-// Routes that show the bottom nav and require auth.
 function AppShell() {
   return (
     <div className="min-h-screen bg-surface flex justify-center">
@@ -38,7 +37,6 @@ function AppShell() {
   )
 }
 
-// Full-bleed routes (auth, onboarding, create) — no bottom nav.
 function BareShell() {
   return (
     <div className="min-h-screen bg-surface flex justify-center">
@@ -49,73 +47,55 @@ function BareShell() {
   )
 }
 
-function RequireAuth({ children }) {
-  const { user, loading } = useAuth()
-  const location = useLocation()
-  if (loading) return <FullScreenLoader />
-  if (!user) {
-    // First-time visitors (no session, not yet onboarded) see onboarding;
-    // returning-but-logged-out users skip straight to login.
-    const onboarded = typeof localStorage !== 'undefined' && localStorage.getItem(ONBOARDING_KEY)
-    return <Navigate to={onboarded ? '/auth' : '/onboarding'} replace state={{ from: location }} />
-  }
-  return children
+// Where should a logged-out visitor land?
+function guestHome() {
+  const onboarded = localStorage.getItem(ONBOARDING_KEY)
+  return onboarded ? '/auth' : '/onboarding'
 }
 
 export default function App() {
   const { user, loading } = useAuth()
-  const onboarded = typeof localStorage !== 'undefined' && localStorage.getItem(ONBOARDING_KEY)
 
   if (loading) return <FullScreenLoader />
 
+  // ── Guest routes ────────────────────────────────────────────────────────────
+  // Logged-out users only ever see onboarding or auth.
+  // Every other URL redirects to the right guest landing page.
+  if (!user) {
+    const dest = guestHome()
+    return (
+      <Routes>
+        <Route element={<BareShell />}>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/auth" element={<Auth />} />
+        </Route>
+        <Route path="*" element={<Navigate to={dest} replace />} />
+      </Routes>
+    )
+  }
+
+  // ── Authenticated routes ────────────────────────────────────────────────────
+  // Logged-in users never see onboarding or auth again.
   return (
     <Routes>
-      {/* Public / full-bleed */}
-      <Route element={<BareShell />}>
-        <Route
-          path="/onboarding"
-          element={user ? <Navigate to="/" replace /> : <Onboarding />}
-        />
-        <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
-        <Route
-          path="/create"
-          element={
-            <RequireAuth>
-              <CreateBet />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/bet/:id"
-          element={
-            <RequireAuth>
-              <BetDetail />
-            </RequireAuth>
-          }
-        />
-      </Route>
-
-      {/* Authed app with bottom nav */}
-      <Route
-        element={
-          <RequireAuth>
-            <AppShell />
-          </RequireAuth>
-        }
-      >
+      {/* Bottom-nav shell */}
+      <Route element={<AppShell />}>
         <Route path="/" element={<Home />} />
         <Route path="/bets" element={<Bets />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
 
-      {/* First-time visitors with no session → onboarding */}
-      <Route
-        path="*"
-        element={
-          <Navigate to={user ? '/' : onboarded ? '/auth' : '/onboarding'} replace />
-        }
-      />
+      {/* Full-bleed routes (no nav) */}
+      <Route element={<BareShell />}>
+        <Route path="/create" element={<CreateBet />} />
+        <Route path="/bet/:id" element={<BetDetail />} />
+      </Route>
+
+      {/* Redirect away from public pages if already logged in */}
+      <Route path="/onboarding" element={<Navigate to="/" replace />} />
+      <Route path="/auth" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
